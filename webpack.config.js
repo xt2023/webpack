@@ -10,12 +10,17 @@ const htmlPlugin = new HtmlPlugin({
     filename: './index.html'
 })
 
-
+//左侧的{}是解构赋值
+const  { CleanWebpackPlugin }  =  require ( 'clean-webpack-plugin' )
 
 
 
 //使用node.js中的导出语法，向外导出一个webpack配置对象
 module.exports = {
+    //在开发调试阶段把devtool的值设置成eval-source-map
+    // devtool: 'eval-source-map',
+    //在实际发布的时候建议把devtool设置成nosources-source-map或直接关闭SourMap
+    devtool: 'nosources-source-map',
     //代表webpack运行模式可选值有development和production
     mode: 'development',
     //开发的时候用development，因为追求的是打包速度不是体积
@@ -28,11 +33,11 @@ module.exports = {
     output: {
         //存放目录,前一个path代表属性表示存到哪个目录，后一个path代表node里的一个模块
         path: path.join(__dirname, 'dist'),
-        filename: 'bundle.js'
+        filename: 'js/bundle.js'
     },
 
     //插件的数组，将来webpack在运行时会调用这些插件
-    plugins: [htmlPlugin],
+    plugins: [htmlPlugin,new  CleanWebpackPlugin ( ), ],
     devServer: {
         //首次打包成功后自动打开浏览器
         open: true,
@@ -48,11 +53,19 @@ module.exports = {
             { test: /\.css$/, use: ['style-loader', 'css-loader'] },
             { test: /\.less$/, use: ['style-loader', 'css-loader', 'less-loader'] },
             //处理图片文件的loader
-            //调用loader一个用字符串也行，多个则指定数组
-            {test: /\.jpg|png|gif$/,use:'url-loader?limit=470'},
+            //调用loader一个用字符串也行，多个则指定数组,在配置url-loader时，多个参数之间要有&符号进行分隔
+            {test: /\.jpg|png|gif$/,use:'url-loader?limit=470&outputPath=images'},
             //使用巴贝拉babel-loader处理高级JS语法
             //配置babel-loader，只需把自己代码转换，一定要排除node_modules中的JS文件，因为第三方包的js文件不存在兼容问题
-            {test: /\.js$/,use:'babel-loader', exclude: /node_modules/}
+            // {test: /\.js$/,use:'babel-loader', exclude: /node_modules/}
         ]
+    },
+    resolve: {
+        alias: {
+            //告诉webpack程序猿写的代码中@表示src这一层目录
+            '@':path.join(__dirname,'./src/')
+        }
     }
+
+
 }
